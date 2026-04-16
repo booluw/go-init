@@ -21,7 +21,7 @@ var menu = []Menu{
 	{name: "Coke", price: 10, abb: "Coke"},
 	{name: "Fanta", price: 8, abb: "Fanta"},
 }
-var order = []string{}
+var order = [][]string{}
 
 func main() {
 	fmt.Println("Welcome to FoodAholic, where your taste bugs jingle")
@@ -79,7 +79,7 @@ func processInput(input string) {
 	default:
 		for i := range menu {
 			if menu[i].abb == input {
-				order = append(order, fmt.Sprintf("%v, %v", menu[i].name, menu[i].price))
+				order = append(order, []string{fmt.Sprintf("%v", menu[i].name), fmt.Sprintf("$%v", menu[i].price)})
 				showMenu()
 				return
 			}
@@ -94,7 +94,9 @@ func processInput(input string) {
 }
 
 func payForOrder() {
-	db.WriteToDB(order)
+	for i := range order {
+		db.WriteToDB(order[i])
+	}
 
 	fmt.Println("Order saved")
 }

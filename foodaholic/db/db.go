@@ -14,7 +14,8 @@ import (
 const FILENAME = "foodaholic.csv"
 
 func init() {
-	isInit := initDB("order, price")
+	headers := []string{"Order", "Price"}
+	isInit := initDB(headers)
 
 	if isInit {
 		fmt.Println("DB has been created")
@@ -23,18 +24,19 @@ func init() {
 	}
 }
 
-func initDB(headers string) bool {
-	file, err := os.Create(FILENAME)
+func initDB(headers []string) bool {
+	file, err := os.OpenFile(FILENAME, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	if err != nil {
 		panic(err)
 	}
 
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
 	defer file.Close()
 
-	writer.Write([]string{ "Order", "Price" })
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	writer.Write(headers)
 
 	return true
 }
