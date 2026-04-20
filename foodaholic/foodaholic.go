@@ -5,7 +5,15 @@ import (
 	"fmt"
 	"foodaholic/db"
 	"os"
+	"text/tabwriter"
 )
+
+type Order struct {
+	CustomerName string
+	Order [][]string
+	TotalBill int
+	Tip int
+}
 
 type Menu struct {
 	name  string
@@ -22,6 +30,7 @@ var menu = []Menu{
 	{name: "Fanta", price: 8, abb: "Fanta"},
 }
 var order = [][]string{}
+var bill = Order{}
 
 func main() {
 	fmt.Println("Welcome to FoodAholic, where your taste bugs jingle")
@@ -40,15 +49,14 @@ func showMenu() {
 	processInput(input)
 }
 
-func showOrder() {
-	fmt.Println("=================")
-	fmt.Println("ORDER")
-	fmt.Println("=================")
-	fmt.Println()
-	for i := range order {
-		fmt.Println(order[i])
+func (b Order) showOrder() {
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 1, '.', tabwriter.AlignRight|tabwriter.Debug)
+	fmt.Fprintf(w, "Orders Price")
+	fmt.Fprintln(w, "a\tb\tc")
+	for i := range bill.Order {
+		fmt.Println(bill.Order[i][0], bill.Order[i][1])
 	}
-	fmt.Println("=================")
+	fmt.Println("====================== TOTAL: ", b.TotalBill, "=====")
 	showOptions()
 
 	input := acceptInput()
@@ -71,15 +79,15 @@ func processInput(input string) {
 	case "Esc":
 		return
 	case "O":
-		showOrder()
+		bill.showOrder()
 	case "P":
-		payForOrder()
+		bill.payForOrder()
 	case "M":
 		showMenu()
 	default:
 		for i := range menu {
 			if menu[i].abb == input {
-				order = append(order, []string{fmt.Sprintf("%v", menu[i].name), fmt.Sprintf("$%v", menu[i].price)})
+				bill.addOrderToBill(menu[i])
 				showMenu()
 				return
 			}
@@ -93,10 +101,12 @@ func processInput(input string) {
 	}
 }
 
-func payForOrder() {
-	for i := range order {
-		db.WriteToDB(order[i])
-	}
-
+func (b *Order) payForOrder() {
+	defer db.WriteToDB(b.Order)
 	fmt.Println("Order saved")
+}
+
+func (b *Order) addOrderToBill (or Menu) {
+	b.Order = append(b.Order, []string{fmt.Sprintf("%v", or.name), fmt.Sprintf("$ %v", or.price)})
+	b.TotalBill += or.price
 }

@@ -14,7 +14,7 @@ import (
 const FILENAME = "foodaholic.csv"
 
 func init() {
-	headers := []string{"Order", "Price"}
+	headers := []string{"Date", "Order", "Price"}
 	isInit := initDB(headers)
 
 	if isInit {
@@ -41,7 +41,7 @@ func initDB(headers []string) bool {
 	return true
 }
 
-func WriteToDB(order []string) bool {
+func WriteToDB(order [][]string) bool {
 	file, err := os.OpenFile(FILENAME, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func WriteToDB(order []string) bool {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	if err := writer.Write(order); err != nil {
+	if err := writer.WriteAll(order); err != nil {
 		panic(err)
 	}
 
