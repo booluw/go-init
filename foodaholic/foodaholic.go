@@ -33,8 +33,11 @@ var order = [][]string{}
 var bill = Order{}
 
 func main() {
-	fmt.Println("Welcome to FoodAholic, where your taste bugs jingle")
-	fmt.Println("What would you like to eat?")
+	fmt.Println("Welcome to FoodAholic, where your taste bugs jingle.")
+	fmt.Println("What should we call you?")
+	fmt.Scanln(&bill.CustomerName)
+
+	fmt.Printf("What would you like to eat %v? \n", bill.CustomerName)
 
 	showMenu()
 }
@@ -102,11 +105,18 @@ func processInput(input string) {
 }
 
 func (b *Order) payForOrder() {
-	defer db.WriteToDB(b.Order)
+	fmt.Printf("Any tip?...")
+	fmt.Scanln(&b.Tip)
+
+	for i := range b.Order {
+		db.WriteToDB(b.Order[i], b.CustomerName)
+	}
+
+	db.WriteToDB([]string{fmt.Sprintf("Tip (%v)", b.Tip), fmt.Sprint(b.TotalBill+b.Tip)}, b.CustomerName)
 	fmt.Println("Order saved")
 }
 
 func (b *Order) addOrderToBill (or Menu) {
-	b.Order = append(b.Order, []string{fmt.Sprintf("%v", or.name), fmt.Sprintf("$ %v", or.price)})
+	b.Order = append(b.Order, []string{fmt.Sprintf("%v", or.name), fmt.Sprintf("%v", or.price)})
 	b.TotalBill += or.price
 }
